@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package chat.server.application;
+package server.application;
 
 import java.io.BufferedReader;
 import java.io.IOException;
