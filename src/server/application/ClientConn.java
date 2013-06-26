@@ -17,7 +17,8 @@ class ClientConn implements Runnable {
         try {
             in = new BufferedReader(new InputStreamReader(client.getInputStream()));
         } catch (IOException e) {
-            System.err.println(e);
+            ServerApplication.ServApp.printMsgOnScreen("IOException" + e);
+            //System.err.println(e);
         }
     }
 
@@ -25,10 +26,12 @@ class ClientConn implements Runnable {
         String msg;
         try {
             while (!"TERMINATE".equals(msg = in.readLine()) && (msg != null)) {
-                System.out.println("Client Thread: (" + Thread.currentThread().getName() + ")MSG: " + msg);
+                ServerApplication.ServApp.printMsgOnScreen("Client Thread: (" + Thread.currentThread().getName() + ")MSG: " + msg);
+                //System.out.println("Client Thread: (" + Thread.currentThread().getName() + ")MSG: " + msg);
             }
         } catch (IOException e) {
-            System.err.println(e);
+            ServerApplication.ServApp.printMsgOnScreen("IOException" + e);
+            //System.err.println(e);
         }
     }
 }

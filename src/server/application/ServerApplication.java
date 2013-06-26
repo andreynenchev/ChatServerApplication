@@ -8,9 +8,12 @@ import java.awt.RenderingHints;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Collection;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JPanel;
@@ -48,6 +51,8 @@ public class ServerApplication extends javax.swing.JFrame {
                 formWindowClosing(evt);
             }
         });
+
+        listClients.setMultipleMode(true);
 
         jTextInput.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -121,17 +126,33 @@ public class ServerApplication extends javax.swing.JFrame {
             if (jTextInput.getText().equalsIgnoreCase("cls")) {
                 jTextOutput.setText("");
             }
-            if (jTextInput.getText().equalsIgnoreCase("exit")) {
+            else if (jTextInput.getText().equalsIgnoreCase("exit")) {
+                Collection<PrintWriter> allClients = clientsOutput.values();
+                Iterator<PrintWriter> it = allClients.iterator(); 
+                for (;it.hasNext();){
+                    it.next().println("TERMINATE_CLIENT");
+                }
                 System.exit(0);
             }
-            if (jTextInput.getText().equalsIgnoreCase("threads.count")) {
+            else if (jTextInput.getText().equalsIgnoreCase("threads.count")) {
                 jTextOutput.setText(jTextOutput.getText() + Thread.activeCount() + "\r\n");
             }
-            if (jTextInput.getText().equalsIgnoreCase("threads.getthreads")) {
+            else if (jTextInput.getText().equalsIgnoreCase("threads.getthreads")) {
                 jTextOutput.setText(jTextOutput.getText() + Thread.getAllStackTraces().values().toString() + "\r\n");
             }
-            jTextInput.setText("");
+            else{
+                String[] selectedClients = listClients.getSelectedItems();
+                //out = new PrintWriter(it.next().getOutputStream(), true);
+                for (int i=0; i< selectedClients.length; i++){
+                        clientsOutput.get(selectedClients[i]).println(jTextInput.getText());
+                }
+                jTextInput.setText("");
+            }
+            
         }
+        
+        
+        
 
         //if (evt.getKeyCode() == )
     }//GEN-LAST:event_jTextInputKeyReleased
@@ -141,6 +162,9 @@ public class ServerApplication extends javax.swing.JFrame {
     private static int port = 4444;
     private static BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
     private static Hashtable<Thread, Socket> map = new Hashtable<>();
+    private Hashtable<String, PrintWriter> clientsOutput = new Hashtable<>();
+    
+    
     public static ServerApplication ServApp;
 
     public static void main(String args[]) {
@@ -189,11 +213,24 @@ public class ServerApplication extends javax.swing.JFrame {
         }
         Thread t = new Thread(new ServerConn(server));
         t.start();
+        
+        //talk with clients
+        
+        
+        
     }
 
-    public void addClienToList(String client) {
-        listClients.add(client);
+    public void addClienToList(Thread thread,Socket socket ) throws IOException {
+        listClients.add(thread.getName());
+        map.put(thread, socket);
+        clientsOutput.put(thread.getName(), new PrintWriter(socket.getOutputStream(), true));
+        
     }
+    
+    public void printMsgOnScreen(String msg){
+        jTextOutput.setText(jTextOutput.getText() + msg + "\r\n");
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;

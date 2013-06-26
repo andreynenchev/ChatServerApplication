@@ -3,6 +3,8 @@ package server.application;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -30,7 +32,12 @@ public class ServerConn implements Runnable {
             }
             Thread t = new Thread(new ClientConn(client));
             t.start();
-            ServerApplication.ServApp.addClienToList(t.getName());
+            try {
+                ServerApplication.ServApp.addClienToList(t,client);
+            } catch (IOException ex) {
+                ServerApplication.ServApp.printMsgOnScreen("IOException" + ex);
+                //Logger.getLogger(ServerConn.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
     
