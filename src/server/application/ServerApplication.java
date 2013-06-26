@@ -4,7 +4,6 @@
  */
 package server.application;
 
-import java.awt.RenderingHints;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -14,9 +13,6 @@ import java.net.Socket;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JPanel;
 
 /**
  *
@@ -130,7 +126,7 @@ public class ServerApplication extends javax.swing.JFrame {
                 Collection<PrintWriter> allClients = clientsOutput.values();
                 Iterator<PrintWriter> it = allClients.iterator(); 
                 for (;it.hasNext();){
-                    it.next().println("TERMINATE_CLIENT");
+                    it.next().println("TERMINATE");
                 }
                 System.exit(0);
             }
@@ -146,9 +142,8 @@ public class ServerApplication extends javax.swing.JFrame {
                 for (int i=0; i< selectedClients.length; i++){
                         clientsOutput.get(selectedClients[i]).println(jTextInput.getText());
                 }
-                jTextInput.setText("");
             }
-            
+            jTextInput.setText("");
         }
         
         
@@ -221,10 +216,14 @@ public class ServerApplication extends javax.swing.JFrame {
     }
 
     public void addClienToList(Thread thread,Socket socket ) throws IOException {
-        listClients.add(thread.getName());
+        listClients.add(thread.getName());//listClients.add(socket.toString()+" "+socket.getPort()); //
         map.put(thread, socket);
         clientsOutput.put(thread.getName(), new PrintWriter(socket.getOutputStream(), true));
-        
+    }
+    public void remClientFromList(Thread thread){
+        listClients.remove(thread.getName());
+        map.remove(thread);
+        clientsOutput.remove(thread.getName());
     }
     
     public void printMsgOnScreen(String msg){

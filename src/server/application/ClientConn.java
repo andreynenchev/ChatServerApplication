@@ -31,6 +31,8 @@ class ClientConn implements Runnable {
             }
         } catch (IOException e) {
             ServerApplication.ServApp.printMsgOnScreen("IOException" + e);
+            ServerApplication.ServApp.remClientFromList(Thread.currentThread());
+            
             //System.err.println(e);
         }
     }
