@@ -118,7 +118,14 @@ public class ServerApplication extends javax.swing.JFrame {
         // TODO add your handling code here:
         //jTextOutput.setText(evt.getKeyCode() + "  " + evt.getKeyChar());
         if (evt.getKeyCode() == 10) {//Enter
-            jTextOutput.setText(jTextOutput.getText() + jTextInput.getText() + "\r\n");
+            String[] selectedClients = listClients.getSelectedItems();
+            jTextOutput.setText(jTextOutput.getText() + "Clients: <");
+            for (int i=0; i< selectedClients.length; i++){
+                jTextOutput.setText(jTextOutput.getText() + selectedClients[i].substring(7)+",");
+            }
+            jTextOutput.setText(jTextOutput.getText() + ">");
+            
+            jTextOutput.setText(jTextOutput.getText() +jTextInput.getText() + "\r\n");
             if (jTextInput.getText().equalsIgnoreCase("cls")) {
                 jTextOutput.setText("");
             }
@@ -137,7 +144,6 @@ public class ServerApplication extends javax.swing.JFrame {
                 jTextOutput.setText(jTextOutput.getText() + Thread.getAllStackTraces().values().toString() + "\r\n");
             }
             else{
-                String[] selectedClients = listClients.getSelectedItems();
                 //out = new PrintWriter(it.next().getOutputStream(), true);
                 for (int i=0; i< selectedClients.length; i++){
                         clientsOutput.get(selectedClients[i]).println(jTextInput.getText());
