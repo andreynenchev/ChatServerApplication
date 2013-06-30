@@ -10,9 +10,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Collection;
 import java.util.Hashtable;
-import java.util.Iterator;
+import java.util.Map;
 
 /**
  *
@@ -42,6 +41,7 @@ public class ServerApplication extends javax.swing.JFrame {
         jTextOutput = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Server");
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
@@ -119,29 +119,33 @@ public class ServerApplication extends javax.swing.JFrame {
         //jTextOutput.setText(evt.getKeyCode() + "  " + evt.getKeyChar());
         if (evt.getKeyCode() == 10) {//Enter
             String[] selectedClients = listClients.getSelectedItems();
-            jTextOutput.setText(jTextOutput.getText() + "Clients: <");
+            //To which client are we writing
+            jTextOutput.append("Clients: <");
             for (int i=0; i< selectedClients.length; i++){
-                jTextOutput.setText(jTextOutput.getText() + selectedClients[i].substring(7)+",");
+                jTextOutput.append(selectedClients[i].substring(7)+",");
             }
-            jTextOutput.setText(jTextOutput.getText() + ">");
+            jTextOutput.append(">");
             
-            jTextOutput.setText(jTextOutput.getText() +jTextInput.getText() + "\r\n");
+            jTextOutput.append(jTextInput.getText() + "\r\n");
+            
             if (jTextInput.getText().equalsIgnoreCase("cls")) {
                 jTextOutput.setText("");
             }
             else if (jTextInput.getText().equalsIgnoreCase("exit")) {
-                Collection<PrintWriter> allClients = clientsOutput.values();
-                Iterator<PrintWriter> it = allClients.iterator(); 
-                for (;it.hasNext();){
-                    it.next().println("TERMINATE");
+                
+                for (Map.Entry<String, PrintWriter> entry : clientsOutput.entrySet()) {
+                    entry.getValue().println("TERMINATE");
                 }
                 System.exit(0);
             }
+            else if (jTextInput.getText().equalsIgnoreCase("Add")) {
+                putClientOnLine("sdfas");
+            }
             else if (jTextInput.getText().equalsIgnoreCase("threads.count")) {
-                jTextOutput.setText(jTextOutput.getText() + Thread.activeCount() + "\r\n");
+                jTextOutput.append(Thread.activeCount() + "\r\n");
             }
             else if (jTextInput.getText().equalsIgnoreCase("threads.getthreads")) {
-                jTextOutput.setText(jTextOutput.getText() + Thread.getAllStackTraces().values().toString() + "\r\n");
+                jTextOutput.append(Thread.getAllStackTraces().values().toString() + "\r\n");
             }
             else{
                 //out = new PrintWriter(it.next().getOutputStream(), true);
@@ -162,8 +166,8 @@ public class ServerApplication extends javax.swing.JFrame {
      */
     private static int port = 4444;
     private static BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-    private static Hashtable<Thread, Socket> map = new Hashtable<>();
-    private Hashtable<String, PrintWriter> clientsOutput = new Hashtable<>();
+    private static Hashtable<Thread, Socket> map = new Hashtable<>();       //All Sockets of clients
+    private Hashtable<String, PrintWriter> clientsOutput = new Hashtable<>();//PrintWriters of all clients, with the names of the threads
     
     
     public static ServerApplication ServApp;
@@ -207,10 +211,8 @@ public class ServerApplication extends javax.swing.JFrame {
         try {
             server = new ServerSocket(port);
         } catch (IOException e) {
-
-            System.err.println("Could not listen on port: " + port);
-            System.err.println(e);
-            System.exit(1);
+            ServApp.printMsgOnScreen("Could not listen on port: " + port +"\r\n"+e);
+            //System.exit(1);
         }
         Thread t = new Thread(new ServerConn(server));
         t.start();
@@ -225,16 +227,56 @@ public class ServerApplication extends javax.swing.JFrame {
         listClients.add(thread.getName());//listClients.add(socket.toString()+" "+socket.getPort()); //
         map.put(thread, socket);
         clientsOutput.put(thread.getName(), new PrintWriter(socket.getOutputStream(), true));
+        //putClientOnLine(thread.getName());
     }
     public void remClientFromList(Thread thread){
         listClients.remove(thread.getName());
         map.remove(thread);
         clientsOutput.remove(thread.getName());
+        putClientOffLine(thread.getName());
     }
     
     public void printMsgOnScreen(String msg){
         jTextOutput.setText(jTextOutput.getText() + msg + "\r\n");
     }
+    
+    public void putClientOnLine(String name){
+        jTextOutput.append(name + " START SENDING...\r\n");
+        for (Map.Entry<String, PrintWriter> entry : clientsOutput.entrySet()) {
+            entry.getValue().println("<<AddClient>>" + name);
+            jTextOutput.append("send to"+ entry.getKey() +"\r\n");
+        }
+        jTextOutput.append(name + " FINISH SENDING...\r\n");
+    }
+    
+    public void putClientOffLine(String name){
+        
+        jTextOutput.append(name + " START SENDING...\r\n");
+        for (Map.Entry<String, PrintWriter> entry : clientsOutput.entrySet()) {
+            entry.getValue().println("<<RemoveClient>>" + name);
+            jTextOutput.append("send to"+ entry.getKey() +"\r\n");
+        }
+        jTextOutput.append(name + " FINISH SENDING...\r\n");
+    }
+    
+    public void getOnLineClients(String name){
+        for (Map.Entry<String, PrintWriter> entry : clientsOutput.entrySet()) {
+            if (!entry.getKey().equals(name))
+                clientsOutput.get(name).println("<<AddClient>>" + entry.getKey());
+        }
+    }
+    
+    public boolean CHECK(String msg){
+        for (Map.Entry<String, PrintWriter> entry : clientsOutput.entrySet()) {
+            if (msg.substring(3, 15).contains(entry.getKey())){
+                entry.getValue().println(msg.substring(msg.indexOf(">>")));
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel jPanel1;
