@@ -150,16 +150,11 @@ public class ServerApplication extends javax.swing.JFrame {
             else{
                 //out = new PrintWriter(it.next().getOutputStream(), true);
                 for (int i=0; i< selectedClients.length; i++){
-                        clientsOutput.get(selectedClients[i]).println(jTextInput.getText());
+                    clientsOutput.get(selectedClients[i]).println(jTextInput.getText());
                 }
             }
             jTextInput.setText("");
         }
-        
-        
-        
-
-        //if (evt.getKeyCode() == )
     }//GEN-LAST:event_jTextInputKeyReleased
     /**
      * @param args the command line arguments
@@ -216,11 +211,6 @@ public class ServerApplication extends javax.swing.JFrame {
         }
         Thread t = new Thread(new ServerConn(server));
         t.start();
-        
-        //talk with clients
-        
-        
-        
     }
 
     public void addClienToList(Thread thread,Socket socket ) throws IOException {
@@ -228,12 +218,17 @@ public class ServerApplication extends javax.swing.JFrame {
         map.put(thread, socket);
         clientsOutput.put(thread.getName(), new PrintWriter(socket.getOutputStream(), true));
         //putClientOnLine(thread.getName());
+        /*wait(1000);
+        for (Map.Entry<String, PrintWriter> entry : clientsOutput.entrySet()) {
+            entry.getValue().println("<<AddClient>>" + thread.getName());
+            //jTextOutput.append("send to"+ entry.getKey() +"\r\n");
+        }*/
     }
     public void remClientFromList(Thread thread){
         listClients.remove(thread.getName());
         map.remove(thread);
         clientsOutput.remove(thread.getName());
-        putClientOffLine(thread.getName());
+        //putClientOffLine(thread.getName());
     }
     
     public void printMsgOnScreen(String msg){
@@ -241,22 +236,22 @@ public class ServerApplication extends javax.swing.JFrame {
     }
     
     public void putClientOnLine(String name){
-        jTextOutput.append(name + " START SENDING...\r\n");
+        //jTextOutput.append(name + " START SENDING...\r\n");
         for (Map.Entry<String, PrintWriter> entry : clientsOutput.entrySet()) {
             entry.getValue().println("<<AddClient>>" + name);
             jTextOutput.append("send to"+ entry.getKey() +"\r\n");
         }
-        jTextOutput.append(name + " FINISH SENDING...\r\n");
+        //jTextOutput.append(name + " FINISH SENDING...\r\n");
     }
     
     public void putClientOffLine(String name){
         
-        jTextOutput.append(name + " START SENDING...\r\n");
+        //jTextOutput.append(name + " START SENDING...\r\n");
         for (Map.Entry<String, PrintWriter> entry : clientsOutput.entrySet()) {
             entry.getValue().println("<<RemoveClient>>" + name);
             jTextOutput.append("send to"+ entry.getKey() +"\r\n");
         }
-        jTextOutput.append(name + " FINISH SENDING...\r\n");
+        //jTextOutput.append(name + " FINISH SENDING...\r\n");
     }
     
     public void getOnLineClients(String name){
@@ -275,6 +270,14 @@ public class ServerApplication extends javax.swing.JFrame {
         }
         return false;
     }
+    
+   public void sendMsgToClient(String msg, String name){
+       for (Map.Entry<String, PrintWriter> entry : clientsOutput.entrySet()) {
+           if(msg.substring(9).contains(entry.getKey())){
+               entry.getValue().println("<<FROMCLIENT>>"+name+">>"+msg.substring(10+entry.getKey().length()));
+           }
+       }
+   }
     
     
     

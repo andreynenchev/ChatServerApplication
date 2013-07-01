@@ -34,19 +34,15 @@ class ClientConn implements Runnable {
             }
         //ServerApplication.ServApp.putClientOnLine(Thread.currentThread().getName());
         try {
+            
             while (!"TERMINATE".equals(msg = in.readLine()) && (msg != null)) {
                 if (msg.equals("<<REFRESH>>")){
                     ServerApplication.ServApp.getOnLineClients(Thread.currentThread().getName());
                 }
-                else if (msg.startsWith("<<")){
-                    if(ServerApplication.ServApp.CHECK(msg)){
-                        ServerApplication.ServApp.printMsgOnScreen("TRUE");
-                    }
-                    else ServerApplication.ServApp.printMsgOnScreen("FALSE");
-                    
+                else if( msg.startsWith("<<SENDTO>>")){
+                    ServerApplication.ServApp.sendMsgToClient(msg, Thread.currentThread().getName());
                 }
                 else ServerApplication.ServApp.printMsgOnScreen("Client Thread: (" + Thread.currentThread().getName() + ")MSG: " + msg);
-                //System.out.println("Client Thread: (" + Thread.currentThread().getName() + ")MSG: " + msg);
             }
             ServerApplication.ServApp.putClientOffLine(Thread.currentThread().getName());
         } catch (IOException e) {
