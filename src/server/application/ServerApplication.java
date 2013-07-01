@@ -160,7 +160,6 @@ public class ServerApplication extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     private static int port = 4444;
-    private static BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
     private static Hashtable<Thread, Socket> map = new Hashtable<>();       //All Sockets of clients
     private Hashtable<String, PrintWriter> clientsOutput = new Hashtable<>();//PrintWriters of all clients, with the names of the threads
     
